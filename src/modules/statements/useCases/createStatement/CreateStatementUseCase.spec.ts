@@ -12,6 +12,12 @@ let createUserUseCase: CreateUserUseCase;
 let createStatementUseCase: CreateStatementUseCase;
 
 describe('Create statement', () => {
+  const user: ICreateUserDTO = {
+    name: 'Test',
+    email: 'user@test.com',
+    password: '123456',
+  };
+
   beforeEach(() => {
     inMemoryUsersRepository = new InMemoryUsersRepository();
     inMemoryStatementsRepository = new InMemoryStatementsRepository();
@@ -20,13 +26,7 @@ describe('Create statement', () => {
   });
 
   it('Should be able to create a new statement', async () => {
-    const user: ICreateUserDTO = {
-      name: 'Test',
-      email: 'user@test.com',
-      password: '123456',
-    };
-
-    const { id } = await createUserUseCase.execute({ ...user });
+    const { id } = await createUserUseCase.execute(user);
 
     const result = await createStatementUseCase.execute({
       user_id: id,
@@ -39,7 +39,7 @@ describe('Create statement', () => {
   });
 
   it('Should not be able to create a statement if user does not exist', async () => {
-    expect(async () => {
+    await expect(async () => {
       await createStatementUseCase.execute({
         user_id: 'Inexistent',
         type: OperationType.DEPOSIT,
@@ -50,15 +50,9 @@ describe('Create statement', () => {
   });
 
   it('Should not be able to create a statement if user does not have enough funds', async () => {
-    expect(async () => {
-      const user: ICreateUserDTO = {
-        name: 'Test',
-        email: 'user@test.com',
-        password: '123456',
-      };
+    const { id } = await createUserUseCase.execute(user);
 
-      const { id } = await createUserUseCase.execute({ ...user });
-
+    await expect(async () => {
       await createStatementUseCase.execute({
         user_id: id,
         type: OperationType.WITHDRAW,

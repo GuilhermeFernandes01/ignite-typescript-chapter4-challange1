@@ -14,6 +14,12 @@ let createStatementUseCase: CreateStatementUseCase;
 let getStatementOperationUseCase: GetStatementOperationUseCase;
 
 describe('Get statement operation', () => {
+  const user: ICreateUserDTO = {
+    name: 'Test',
+    email: 'user@test.com',
+    password: '123456',
+  };
+
   beforeEach(() => {
     inMemoryUsersRepository = new InMemoryUsersRepository();
     inMemoryStatementsRepository = new InMemoryStatementsRepository();
@@ -23,13 +29,7 @@ describe('Get statement operation', () => {
   });
 
   it('Should be able to get statement operation', async () => {
-    const user: ICreateUserDTO = {
-      name: 'Test',
-      email: 'user@test.com',
-      password: '123456',
-    };
-
-    const { id: user_id } = await createUserUseCase.execute({ ...user });
+    const { id: user_id } = await createUserUseCase.execute(user);
 
     const { id: statement_id } = await createStatementUseCase.execute({
       user_id,
@@ -44,21 +44,15 @@ describe('Get statement operation', () => {
   });
 
   it('Should not be able to get statement operation if user does not exist', async () => {
-    expect(async () => {
+    await expect(async () => {
       await getStatementOperationUseCase.execute({ user_id: 'Inexistent', statement_id: 'Any' });
     }).rejects.toBeInstanceOf(GetStatementOperationError.UserNotFound);
   });
 
   it('Should not be able to get statement operation if statement operation does not exist', async () => {
-    expect(async () => {
-      const user: ICreateUserDTO = {
-        name: 'Test',
-        email: 'user@test.com',
-        password: '123456',
-      };
+    const { id: user_id } = await createUserUseCase.execute(user);
 
-      const { id: user_id } = await createUserUseCase.execute({ ...user });
-
+    await expect(async () => {
       await getStatementOperationUseCase.execute({ user_id, statement_id: 'Inexistent' });
     }).rejects.toBeInstanceOf(GetStatementOperationError.StatementNotFound);
   });

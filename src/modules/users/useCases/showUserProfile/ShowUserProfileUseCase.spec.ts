@@ -23,7 +23,7 @@ describe('Show user profile', () => {
       password: '123456',
     };
 
-    const { id } = await createUserUseCase.execute({ ...user });
+    const { id } = await createUserUseCase.execute(user);
 
     const result = await showUserProfileUseCase.execute(id);
 

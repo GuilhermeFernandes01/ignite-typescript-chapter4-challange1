@@ -9,6 +9,12 @@ let createUserUseCase: CreateUserUseCase;
 let authenticateUserUseCase: AuthenticateUserUseCase;
 
 describe('Authenticate user', () => {
+  const user: ICreateUserDTO = {
+    name: 'Test',
+    email: 'user@test.com',
+    password: '123456',
+  };
+
   beforeEach(() => {
     inMemoryUsersRepository = new InMemoryUsersRepository();
     createUserUseCase = new CreateUserUseCase(inMemoryUsersRepository);
@@ -16,13 +22,7 @@ describe('Authenticate user', () => {
   });
 
   it('Should be able to authenticate an user', async () => {
-    const user: ICreateUserDTO = {
-      name: 'Test',
-      email: 'user@test.com',
-      password: '123456',
-    };
-
-    await createUserUseCase.execute({ ...user });
+    await createUserUseCase.execute(user);
 
     const result = await authenticateUserUseCase.execute({
       email: user.email,
@@ -33,7 +33,7 @@ describe('Authenticate user', () => {
   });
 
   it('Should not be able to authenticate a user if it does not exist', async () => {
-    expect(async () => {
+    await expect(async () => {
       await authenticateUserUseCase.execute({
         email: 'inexistent@test.com',
         password: '123456',
@@ -42,15 +42,9 @@ describe('Authenticate user', () => {
   });
 
   it('Should not be able to authenticate a user if its password does not match', async () => {
-    expect(async () => {
-      const user: ICreateUserDTO = {
-        name: 'Test',
-        email: 'user@test.com',
-        password: '123456',
-      };
+    await createUserUseCase.execute(user);
 
-      await createUserUseCase.execute({ ...user });
-
+    await expect(async () => {
       await authenticateUserUseCase.execute({
         email: user.email,
         password: 'Incorrect'
